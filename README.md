@@ -56,12 +56,54 @@ brew install devdeck-server
 ```
 
 ### Running
+You can either run it manually:
 
 ```bash
-./devdeck-server
+devdeck-server
+```
+Or you can run it on the background:
+```bash
+brew services start devdeck-server
 ```
 
-The server will start on port 8080 by default.
+The server will start on port 8080 by default, but you can specify the port in the config file: `$HOME/.config/devdeck/config.toml`
+```toml
+[server]
+port=8080
+```
+
+## Examples
+### Contexts
+#### Creating a System Preferences context and adding two commands
+```toml
+[[commands]]
+app = "System Preferences"
+type = "context"
+icon = "cog-outline"
+context = "system"
+main = true
+
+[[commands]]
+description = "Volume Down"
+action = "aerospace volume down"
+type = "action"
+context = "system"
+
+[[commands]]
+action = "aerospace volume up"
+description = "Volume Up"
+type = "action"
+context = "system"
+```
+### Opening an application
+```toml
+[[commands]]
+app = "Obsidian"
+icon = "document-outline"
+action = "open"
+type = "action"
+main = true
+```
 
 ## License
 
