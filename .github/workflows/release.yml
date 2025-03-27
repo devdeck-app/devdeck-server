@@ -32,7 +32,7 @@ jobs:
           git config --global user.name "GitHub Actions"
 
           git clone https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/devdeck-app/homebrew-devdeck-server.git
-          cp dist/devdeck-server.rb homebrew-devdeck-server/Formula/devdeck-server.rb
+          cp dist/homebrew/devdeck-server.rb homebrew-devdeck-server/Formula/devdeck-server.rb
           cd homebrew-devdeck-server
           git add Formula/devdeck-server.rb
           git commit -m "Update formula for ${{ github.ref_name }}"

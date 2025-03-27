@@ -16,6 +16,7 @@ archives:
 
 brews:
   - name: devdeck-server
+    folder: "dist/homebrew"
     homepage: "https://github.com/devdeck-app/devdeck-server"
     description: "DevDeck server for the DevDeck mobile app"
     install: |
