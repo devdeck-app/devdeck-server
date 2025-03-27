@@ -33,8 +33,11 @@ brews:
     install: |
       bin.install "devdeck-server"
     service: |
-      run [opt_bin]/"devdeck-server"
+      run [opt_bin/"devdeck-server"]
       keep_alive true
+      working_dir var
+      log_path var/"log/devdeck-server.log"
+      error_log_path var/"log/devdeck-server.err.log"
     test: |
       require "timeout"
       pid = fork do
