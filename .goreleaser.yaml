@@ -1,0 +1,32 @@
+project_name: devdeck-server
+
+builds:
+  - main: .
+    goos: [darwin]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .Project }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+
+brews:
+  - name: devdeck-server
+    homepage: "https://github.com/devdeck-app/devdeck-server"
+    description: "Deck-based automation server written in Go"
+    install: |
+      bin.install "devdeck-server"
+    service:
+      run: [opt_bin/"devdeck-server"]
+      keep_alive: true
+      log_path: var/"log/devdeck-server.log"
+      error_log_path: var/"log/devdeck-server.err.log"
+    test: |
+      system "#{bin}/devdeck-server", "--help"
+
+changelog:
+  use: github
