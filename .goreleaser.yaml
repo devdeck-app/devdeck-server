@@ -17,16 +17,18 @@ archives:
 brews:
   - name: devdeck-server
     homepage: "https://github.com/devdeck-app/devdeck-server"
-    description: "Deck-based automation server written in Go"
+    description: "DevDeck server for the DevDeck mobile app"
     install: |
       bin.install "devdeck-server"
-    service:
-      run: [opt_bin/"devdeck-server"]
-      keep_alive: true
-      log_path: var/"log/devdeck-server.log"
-      error_log_path: var/"log/devdeck-server.err.log"
     test: |
-      system "#{bin}/devdeck-server", "--help"
+      require "timeout"
+      pid = fork do
+        exec "#{bin}/devdeck-server"
+      end
+      sleep 2
+      assert_predicate Process.kill(0, pid), :==, 1
+      Process.kill("TERM", pid)
+      Process.wait(pid)
 
 changelog:
   use: github
