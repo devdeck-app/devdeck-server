@@ -27,7 +27,7 @@ brews:
       owner: devdeck-app
       name: homebrew-devdeck-server
       branch: master
-      token: "{{ .Env.GH_TOKEN }}"
+      token: "{{ .Env.GITHUB_TOKEN }}"
     description: "DevDeck server for the DevDeck mobile app"
     license: MIT
     install: |
