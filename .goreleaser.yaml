@@ -16,11 +16,41 @@ archives:
 
 brews:
   - name: devdeck-server
-    directory: "dist/homebrew"
+    directory: Formula
     homepage: "https://github.com/devdeck-app/devdeck-server"
     description: "DevDeck server for the DevDeck mobile app"
+    license: MIT
     install: |
       bin.install "devdeck-server"
+    plist: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>devdeck-server</string>
+
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/devdeck-server</string>
+          </array>
+
+          <key>RunAtLoad</key>
+          <true/>
+
+          <key>KeepAlive</key>
+          <true/>
+
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+
+          <key>StandardOutPath</key>
+          <string>#{var}/log/devdeck-server.log</string>
+
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/devdeck-server.err.log</string>
+        </dict>
+      </plist>
     test: |
       require "timeout"
       pid = fork do
