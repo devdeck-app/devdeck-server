@@ -51,9 +51,8 @@ main = true # Whether to show on main screen
 ### Installation
 
 ```bash
-git clone https://github.com/devdeck-app/devdeck-server
-cd devdeck-server
-go build
+brew tap devdeck-app/homebrew-devdeck-server
+brew install devdeck-server
 ```
 
 ### Running
