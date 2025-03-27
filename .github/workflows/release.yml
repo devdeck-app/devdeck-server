@@ -28,7 +28,7 @@ jobs:
 
       - name: Verify files
         run: |
-          ls -R .
+          ls -R dist
 
       - name: Copy Homebrew formula to tap repo
         run: |
