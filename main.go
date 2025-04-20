@@ -65,14 +65,14 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, `{"status": "ok", "server": "DevDeck"}`)
-	
+
 	services.Info("Health check successful for %s", clientIP)
 }
 
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	clientIP := r.RemoteAddr
 	services.Info("WebSocket connection request from %s", clientIP)
-	
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		services.Error("Error upgrading connection from %s: %v", clientIP, err)
@@ -124,7 +124,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 			services.SendMessage(conn, []byte(`{"error": "Missing or invalid 'type' field"}`))
 			continue
 		}
-		
+
 		services.Info("Processing event type '%s' from %s", eventType, clientIP)
 
 		switch eventType {
@@ -150,7 +150,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 				services.SendMessage(conn, []byte(`{"error": "Invalid context name", "success": false}`))
 				continue
 			}
-			
+
 			services.Info("Switching to context '%s' for client %s", contextName, clientIP)
 
 			contextCommands := []commands.Command{
@@ -161,7 +161,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 					Context: "main",
 				},
 			}
-			
+
 			count := 0
 			for _, cmd := range cmds {
 				if cmd.Context == contextName && !cmd.Main {
@@ -169,7 +169,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 					count++
 				}
 			}
-			
+
 			services.Debug("Found %d commands for context '%s'", count, contextName)
 
 			response, _ := json.Marshal(map[string]any{
@@ -185,7 +185,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 					rootCommands = append(rootCommands, c)
 				}
 			}
-			
+
 			services.Debug("Sending %d root commands to client", len(rootCommands))
 			response, _ := json.Marshal(map[string]any{
 				"commands": rootCommands,
@@ -195,7 +195,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 		case "run":
 			contextName, contextOk := request["context"].(string)
 			uuid, uuidOk := request["uuid"].(string)
-			
+
 			if !contextOk || !uuidOk {
 				services.Error("Missing context or UUID in run command from %s", clientIP)
 				services.SendMessage(conn, []byte(`{"error": "Missing required parameters", "success": false}`))
@@ -213,14 +213,14 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 			}
-			
+
 			if !found {
 				services.Error("Command not found - UUID: %s, Context: %s", uuid, contextName)
 				services.SendMessage(conn, []byte(`{"error": "Command not found", "success": false}`))
 				continue
 			}
-			
-			services.Info("Executing command: %s (App: %s, Action: %s)", 
+
+			services.Info("Executing command: %s (App: %s, Action: %s)",
 				command.Description, command.App, command.Action)
 
 			switch command.Action {
@@ -238,7 +238,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 				if len(actionParts) > 0 {
 					services.Debug("Executing command: %s with %d arguments", actionParts[0], len(actionParts)-1)
 				}
-				
+
 				err := command.Execute()
 				if err != nil {
 					services.Error("Error executing command: %v", err)
@@ -261,20 +261,20 @@ func main() {
 	// Set up standard logger for backward compatibility
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	
+
 	// Initialize our new logger system
 	logLevel := services.INFO
 	if logLevelStr := viper.GetString("log.level"); logLevelStr != "" {
 		logLevel = services.GetLogLevel(logLevelStr)
 	}
-	
+
 	enableFileLogging := viper.GetBool("log.file_enabled")
 	services.SetupLogging(enableFileLogging, logLevel)
 	defer services.CloseLogger()
-	
+
 	services.Info("DevDeck server starting up...")
 	services.Info("Log level set to: %v, File logging: %v", logLevel, enableFileLogging)
-	
+
 	// Load configuration
 	services.LoadConfig(&cmds, &layout)
 
@@ -287,8 +287,6 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	srv := &http.Server{Addr: ":8080"}
-
 	go services.RegisterMDNS()
 
 	http.HandleFunc("/health", healthHandler)
@@ -296,8 +294,10 @@ func main() {
 
 	port := viper.GetString("server.port")
 	if port == "" {
-		port = "8080"
+		port = "4242"
 	}
+
+	srv := &http.Server{Addr: fmt.Sprintf(":%s", port)}
 
 	// Log all available network interfaces for debugging
 	interfaces, _ := net.Interfaces()
@@ -307,7 +307,7 @@ func main() {
 			services.Error("Error getting addresses for interface %s: %v", intf.Name, err)
 			continue
 		}
-		
+
 		if len(addrs) > 0 {
 			addrStrings := make([]string, len(addrs))
 			for i, addr := range addrs {
@@ -321,7 +321,7 @@ func main() {
 	services.Info("Starting DevDeck server on port %s", port)
 	services.Info("Health endpoint: http://localhost:%s/health", port)
 	services.Info("WebSocket endpoint: ws://localhost:%s/ws", port)
-	
+
 	go func() {
 		services.Info("Server ready to accept connections")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

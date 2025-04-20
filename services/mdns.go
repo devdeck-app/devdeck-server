@@ -2,7 +2,6 @@ package services
 
 import (
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,17 +10,13 @@ import (
 )
 
 func RegisterMDNS() {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		log.Fatalf("Failed to get loopback interface: %v", err)
-	}
 	server, err := zeroconf.Register(
 		"DevDeck",
 		"_devdeck._tcp",
 		"local.",
-		8080,
-		[]string{"txtv=0", "lo=1", "la=2"},
-		ifaces,
+		4242,
+		[]string{"txtv=0", "lo=1", "la=2", "usb=true"},
+		nil,
 	)
 
 	if err != nil {
